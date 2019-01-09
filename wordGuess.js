@@ -1,11 +1,25 @@
 var Word = require("./libs/word");
 var inquirer = require("inquirer");
+var fs = require("fs");
+var dict = [];
 
-var dict = ["ross", "jonathan", "gongaware"];
+//Get words from dictionary
+fs.readFile("./dict.txt", "utf8", function (err, data) {
+	if (err) {
+		console.log(err);
+	} else {
+		dict = data.split("\n");
 
-console.log("\n\n");
+		//These are important to ensure the termainal control characters that allow the terminal to update
+		//lines instead of printing each turns results.
+		console.log("\n\n");
 
-new Game(dict[Math.floor(Math.random() * dict.length)]).playGame();
+		new Game(dict[Math.floor(Math.random() * dict.length)]).playGame();
+	}
+})
+
+
+
 
 function Game(word) {
 	var word = new Word(word);
@@ -23,7 +37,7 @@ function Game(word) {
 	}
 
 	var turn = function (wrongs) {
-		console.log("\033[K\033[F\033[K\033[F\033[K\033[F\033[K" + word.getBlanks());
+		console.log("\r\033[K\033[F\033[K\033[F\033[K\033[F\033[K" + word.getBlanks());
 
 		if (word.isGuessed()) {
 			console.log("Congratulations!")
@@ -41,7 +55,6 @@ function Game(word) {
 				turn(wrongs);
 			});
 		} else {
-			console.log("YOU LOSE!");
 			word.reveal();
 			console.log(word.getBlanks() + " was the word!");
 			askForAnotherGame();
@@ -53,6 +66,8 @@ function Game(word) {
 			{ message: "Would you like to play again?", name: "confirm", type: "confirm" }
 		]).then(function (response) {
 			if (response.confirm) {
+				//Ensures it looks pretty
+				console.log("\r\033[K\033[F\033[K");
 				new Game(dict[Math.floor(Math.random() * dict.length)]).playGame();
 			}
 		});
