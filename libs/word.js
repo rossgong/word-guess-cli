@@ -33,14 +33,8 @@ function Word(word) {
 		return guessed;
 	};
 
-	this.getBlanks = function () {
-		var str = "";
-
-		this.letters.forEach(letter => {
-			str += letter.blank() + " ";
-		})
-
-		return str.slice(0, -1);
+	this.toString = function () {
+		return this.letters.join(" ");
 	};
 }
 

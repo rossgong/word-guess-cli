@@ -17,7 +17,7 @@ function Letter(char) {
 		}
 	}
 
-	this.blank = function () {
+	this.toString = function () {
 		if (this.guessed) {
 			return this.char;
 		} else {

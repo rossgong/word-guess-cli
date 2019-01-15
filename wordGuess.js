@@ -12,14 +12,9 @@ fs.readFile("./dict.txt", "utf8", function (err, data) {
 
 		//These are important to ensure the termainal control characters that allow the terminal to update
 		//lines instead of printing each turns results.
-		console.log("\n\n");
-
 		new Game(dict[Math.floor(Math.random() * dict.length)]).playGame();
 	}
-})
-
-
-
+});
 
 function Game(word) {
 	var word = new Word(word);
@@ -29,21 +24,23 @@ function Game(word) {
 	var validateGuess = function (input) {
 		if (typeof input != "string" || input.length != 1) {
 			return "Guess must be a single character";
-		} else if (guesses.indexOf(input.toUpperCase()) != -1) {
+		} else if (guesses.includes(input.toUpperCase())) {
 			return "This guess must be new";
+		} else if (/[A-Z]*/.test(input.toUpperCase())) {
+			return "Must be a letter A-Z";
 		} else {
 			return true;
 		}
 	}
 
 	var turn = function (wrongs) {
-		console.log("\r\033[K\033[F\033[K\033[F\033[K\033[F\033[K" + word.getBlanks());
+		console.log("" + word);
 
 		if (word.isGuessed()) {
 			console.log("Congratulations!")
 			askForAnotherGame();
 		} else if (wrongs < 5) {
-			console.log("Guesses so far: " + guesses.join(" ") + " (" + (5 - wrongs) + " guesses left)");
+			console.log("Guesses so far: " + guesses.join(" ") + " (" + (5 - wrongs) + " wrongs left)");
 
 			inquirer.prompt([
 				{ message: "Which letter do you guess?", name: "guess", validate: validateGuess }
@@ -51,12 +48,15 @@ function Game(word) {
 				guesses.push(response.guess.toUpperCase());
 				if (!word.guess(response.guess)) {
 					wrongs++;
+					console.log("\x1b[31mWRONG GUESS!!\x1b[0m");
+				} else {
+					console.log("\x1b[32mCORRECT!\x1b[0m");
 				}
 				turn(wrongs);
 			});
 		} else {
 			word.reveal();
-			console.log(word.getBlanks() + " was the word!");
+			console.log(word + " was the word!");
 			askForAnotherGame();
 		}
 	}
@@ -66,8 +66,6 @@ function Game(word) {
 			{ message: "Would you like to play again?", name: "confirm", type: "confirm" }
 		]).then(function (response) {
 			if (response.confirm) {
-				//Ensures it looks pretty
-				console.log("\r\033[K\033[F\033[K");
 				new Game(dict[Math.floor(Math.random() * dict.length)]).playGame();
 			}
 		});
